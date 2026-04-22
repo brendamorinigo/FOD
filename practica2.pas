@@ -23,10 +23,10 @@ vecAux: array[1..16] of regDet;
 
 procedure leer(var arch:detalle; var info:regDet);
 begin
-    if(not EOF(arch)) then begin{
+    if(not EOF(arch)) then begin
         read(arch,info);
 
-    }else
+    else
         info.codP:=valorAlto;
 end;
 
@@ -39,6 +39,8 @@ begin
         if(aux[i].codP<min)then begin
             pos:=i;
             min:=aux[i].codP;
+           
+        end;
     end;
     
     if(min<>valorAlto)then begin    
@@ -50,11 +52,45 @@ begin
     end;    
 end;
 
+procedure actualizarMaestro(var archDetalle:vectorDet; var archMaestro:maestro);
+var i,codAct:integer; mae:regMae; det:regDet; aux:vecAux; kilosTot:real;
+begin
+    for i:=1 to 16 do begin 
+        assign(archDetalle[i],'det'+i);
+        reset(archDetalle[i]);
+         leer(det[i],aux[i]);
+    end;
+    buscarMinimo(archDetalle,aux,det);
+    reset(archMaestro);
+
+    while(det.codP<>valorAlto) do begin   
+        kilosTot:=0;
+        codAct:=det.codP;
+        while(det.codP<>nil)and (codAct=det.codP) do begin
+            kilosTot:=det.kilos +kilosTot;
+            buscarMinimo(archDetalle,aux,det);
+        end;
+        
+        read(archMaestro,mae);
+        while(not eof(archMaestro)) and (mae.codP<>codAct) do begin 
+            read(archMaestro,mae);
+        end;
+        mae.kilos:=kilosTot;
+        seek(archMaestro,filePos(archMaestro)-1);
+        write(archMaestro,mae);
+    end;
+end;
 
 
-
-
+var 
+    detalles:vectorDet;
+    maeArch:maestro;
 
 begin
-    
+for i:=1 to 16 do begin 
+   assign(detalles[i],i);
+   
+end; 
+assign(maeArch,'/rutaDelMaestro.txt')
+actualizarMaestro(detalles,maeArch);
 end.
